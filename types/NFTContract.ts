@@ -43,7 +43,7 @@ export interface NFTContractInterface extends utils.Interface {
     "salePrice()": FunctionFragment;
     "saleStart()": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
-    "setMaxMintTx(uint256)": FunctionFragment;
+    "setMaxMintTx(uint64)": FunctionFragment;
     "setMerkleRoot(bytes32)": FunctionFragment;
     "setMintPaused(bool)": FunctionFragment;
     "setSalePrice(uint256)": FunctionFragment;
@@ -275,15 +275,15 @@ export interface NFTContractInterface extends utils.Interface {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "ConsecutiveTransfer(uint256,uint256,address,address)": EventFragment;
-    "MaxMintTxUpdated(uint256)": EventFragment;
+    "MaxMintTxUpdated(uint64)": EventFragment;
     "MerkleRootUpdated(bytes32)": EventFragment;
     "MintPausedUpdated(bool)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Reveal(string)": EventFragment;
     "SalePriceUpdated(uint256)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
+    "UnrevealedURIUpdated(string)": EventFragment;
     "WlPriceUpdated(uint256)": EventFragment;
-    "unrevealedURIUpdated(string)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
@@ -296,8 +296,8 @@ export interface NFTContractInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Reveal"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SalePriceUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UnrevealedURIUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WlPriceUpdated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "unrevealedURIUpdated"): EventFragment;
 }
 
 export type ApprovalEvent = TypedEvent<
@@ -364,17 +364,17 @@ export type TransferEvent = TypedEvent<
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
-export type WlPriceUpdatedEvent = TypedEvent<[BigNumber], { price: BigNumber }>;
-
-export type WlPriceUpdatedEventFilter = TypedEventFilter<WlPriceUpdatedEvent>;
-
-export type unrevealedURIUpdatedEvent = TypedEvent<
+export type UnrevealedURIUpdatedEvent = TypedEvent<
   [string],
   { unrevealedURI_: string }
 >;
 
-export type unrevealedURIUpdatedEventFilter =
-  TypedEventFilter<unrevealedURIUpdatedEvent>;
+export type UnrevealedURIUpdatedEventFilter =
+  TypedEventFilter<UnrevealedURIUpdatedEvent>;
+
+export type WlPriceUpdatedEvent = TypedEvent<[BigNumber], { price: BigNumber }>;
+
+export type WlPriceUpdatedEventFilter = TypedEventFilter<WlPriceUpdatedEvent>;
 
 export interface NFTContract extends BaseContract {
   contractName: "NFTContract";
@@ -879,7 +879,7 @@ export interface NFTContract extends BaseContract {
       to?: string | null
     ): ConsecutiveTransferEventFilter;
 
-    "MaxMintTxUpdated(uint256)"(max?: null): MaxMintTxUpdatedEventFilter;
+    "MaxMintTxUpdated(uint64)"(max?: null): MaxMintTxUpdatedEventFilter;
     MaxMintTxUpdated(max?: null): MaxMintTxUpdatedEventFilter;
 
     "MerkleRootUpdated(bytes32)"(root?: null): MerkleRootUpdatedEventFilter;
@@ -914,15 +914,15 @@ export interface NFTContract extends BaseContract {
       tokenId?: BigNumberish | null
     ): TransferEventFilter;
 
+    "UnrevealedURIUpdated(string)"(
+      unrevealedURI_?: null
+    ): UnrevealedURIUpdatedEventFilter;
+    UnrevealedURIUpdated(
+      unrevealedURI_?: null
+    ): UnrevealedURIUpdatedEventFilter;
+
     "WlPriceUpdated(uint256)"(price?: null): WlPriceUpdatedEventFilter;
     WlPriceUpdated(price?: null): WlPriceUpdatedEventFilter;
-
-    "unrevealedURIUpdated(string)"(
-      unrevealedURI_?: null
-    ): unrevealedURIUpdatedEventFilter;
-    unrevealedURIUpdated(
-      unrevealedURI_?: null
-    ): unrevealedURIUpdatedEventFilter;
   };
 
   estimateGas: {

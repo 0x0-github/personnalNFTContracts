@@ -19,29 +19,25 @@ contract NFTContract is ERC721ABurnable, Ownable {
 
     bool public mintPaused = false;
 
+    uint64 public maxMintTx = 3;
+
     uint256 public salePrice = 2;
     uint256 public wlPrice = 1;
 
-    uint256 public maxMintTx = 3;
-
     uint256 public saleStart;
 
-    // Validating whitelisted addresses using merkle tree
     bytes32 public merkleRoot;
 
-    // Metadata data
     string public baseURI;
     string public unrevealedURI;
 
     event MintPausedUpdated(bool paused);
     event SalePriceUpdated(uint256 price);
     event WlPriceUpdated(uint256 price);
-    event MaxMintTxUpdated(uint256 max);
+    event MaxMintTxUpdated(uint64 max);
     event MerkleRootUpdated(bytes32 root);
-    event unrevealedURIUpdated(string unrevealedURI_);
+    event UnrevealedURIUpdated(string unrevealedURI_);
     event Reveal(string baseURI_);
-
-    receive() external payable {}
 
     constructor(
         uint256 saleStart_,
@@ -52,6 +48,8 @@ contract NFTContract is ERC721ABurnable, Ownable {
         saleStart = saleStart_;
         merkleRoot = merkleRoot_;
     }
+
+    receive() external payable {}
 
     function setMintPaused(bool paused) external onlyOwner {
         mintPaused = paused;
@@ -71,7 +69,7 @@ contract NFTContract is ERC721ABurnable, Ownable {
         emit WlPriceUpdated(price);
     }
 
-    function setMaxMintTx(uint256 max) external onlyOwner {
+    function setMaxMintTx(uint64 max) external onlyOwner {
         maxMintTx = max;
 
         emit MaxMintTxUpdated(max);
@@ -89,7 +87,7 @@ contract NFTContract is ERC721ABurnable, Ownable {
     {
         unrevealedURI = unrevealedURI_;
 
-        emit unrevealedURIUpdated(unrevealedURI_);
+        emit UnrevealedURIUpdated(unrevealedURI_);
     }
 
     function reveal(string calldata baseURI_) external onlyOwner {
@@ -107,31 +105,6 @@ contract NFTContract is ERC721ABurnable, Ownable {
 
     function numberMinted(address _owner) external view returns (uint256) {
         return _numberMinted(_owner);
-    }
-
-    function isSale() public view returns (bool) {
-        return block.timestamp >= saleStart;
-    }
-
-    function totalMinted() public view returns (uint256) {
-        return _totalMinted();
-    }
-
-    function tokenURI(uint256 _nftId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        if (!_exists(_nftId))
-            revert URIQueryForNonexistentToken();
-
-        if (bytes(baseURI).length != 0)
-            return string(
-                abi.encodePacked(baseURI, _toString(_nftId), ".json")
-            );
-
-        return unrevealedURI;
     }
 
     function saleMint(
@@ -156,38 +129,48 @@ contract NFTContract is ERC721ABurnable, Ownable {
 
         // TODO: Add check on max mints ?
 
-        if (_isWhiteListed(msg.sender, _proof)) {
-            if (msg.value != amount * wlPrice)
-                revert IncorrectETHValue();
-        } else {
-            if (msg.value != amount * salePrice)
-                revert IncorrectETHValue();
+        bool whitelisted = MerkleProof.verify(
+            _proof,
+            merkleRoot,
+            keccak256(abi.encodePacked(msg.sender))
+        );
+
+        if (whitelisted && msg.value != amount * wlPrice) {
+            revert IncorrectETHValue();
+        } else if (!whitelisted && msg.value != amount * salePrice) {
+            revert IncorrectETHValue();
         }
 
         _mint(recipient, amount);
     }
 
+    function isSale() public view returns (bool) {
+        return block.timestamp >= saleStart;
+    }
+
+    function totalMinted() public view returns (uint256) {
+        return _totalMinted();
+    }
+
+    function tokenURI(uint256 _nftId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        if (!_exists(_nftId))
+            revert URIQueryForNonexistentToken();
+
+        if (bytes(baseURI).length != 0) {
+            return string(
+                abi.encodePacked(baseURI, _toString(_nftId), ".json")
+            );
+        }
+
+        return unrevealedURI;
+    }
+
     function _startTokenId() internal pure override returns (uint256) {
         return 1;
-    }
-
-    function _isWhiteListed(address account, bytes32[] calldata proof)
-        private
-        view
-        returns (bool)
-    {
-        return _verify(_leaf(account), proof);
-    }
-
-    function _leaf(address account) private pure returns(bytes32) {
-        return keccak256(abi.encodePacked(account));
-    }
-
-    function _verify(bytes32 leaf, bytes32[] memory proof)
-        private
-        view
-        returns (bool)
-    {
-        return MerkleProof.verify(proof, merkleRoot, leaf);
     }
 }
