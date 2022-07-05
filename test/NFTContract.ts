@@ -8,6 +8,7 @@ import { BASE_URI, UNREVEAL_URI } from "../utils/constants";
 import { waitFor } from "../utils/tx-helper";
 import { keccak256 } from "ethers/lib/utils";
 import { timeTravel } from "../utils/localhost-evm-time-travel";
+import { BigNumber } from "ethers";
 
 describe("NFTContract", async () => {
   const saleTimeout = 1200;
@@ -266,6 +267,9 @@ describe("NFTContract", async () => {
       expect(await nftContract.numberMinted(rdmWhitelistedAccount1.address)).eq(6);
 
       await waitFor(nftContract.burn(1));
+
+      expect(await nftContract.totalSupply())
+        .eq((await nftContract.totalMinted()).sub(1));
 
       expect(await nftContract.numberMinted(deployer.address)).eq(1);
 
@@ -548,6 +552,27 @@ describe("NFTContract", async () => {
           { value: price.mul(maxMintTx.add(1000)) }
         )
       ).to.be.revertedWith("AmountGtMax");
+
+      await waitFor(nftContract.setSalePrice(0));
+      await waitFor(nftContract.setWlPrice(0));
+
+      const maxUint = BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
+      await expect(
+        nftContract.saleMint(
+          maxUint,
+          deployer.address,
+          whitelistTree.getHexProof(keccak256(deployer.address))
+        )
+      ).to.be.revertedWith("AmountGtMax");
+
+      await expect(
+        nftContract.saleMint(
+          maxUint.add(1),
+          deployer.address,
+          whitelistTree.getHexProof(keccak256(deployer.address))
+        )
+      ).to.be.reverted;
     });
     it("Reverts if sold out", async () => {
       await timeTravel(saleTimeout + 1);
@@ -585,6 +610,28 @@ describe("NFTContract", async () => {
           { value: price }
         )
       ).to.be.revertedWith("SoldOut");
+
+      const maxUint = BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
+      await waitFor(nftContract.setMaxMintTx(maxUint));
+      await waitFor(nftContract.setSalePrice(0));
+      await waitFor(nftContract.setWlPrice(0));
+
+      await expect(
+        nftContract.saleMint(
+          maxUint,
+          deployer.address,
+          whitelistTree.getHexProof(keccak256(deployer.address))
+        )
+      ).to.be.reverted;
+
+      await expect(
+        nftContract.saleMint(
+          maxUint.add(1),
+          deployer.address,
+          whitelistTree.getHexProof(keccak256(deployer.address))
+        )
+      ).to.be.reverted;
     });
     it("Reverts if incorrect ETH sent", async () => {
       await timeTravel(saleTimeout + 1);
@@ -598,6 +645,15 @@ describe("NFTContract", async () => {
           deployer.address,
           whitelistTree.getHexProof(keccak256(deployer.address)),
           { value: 0 }
+        )
+      ).to.be.revertedWith("IncorrectETHValue");
+
+      await expect(
+        nftContract.saleMint(
+          1,
+          deployer.address,
+          whitelistTree.getHexProof(keccak256(deployer.address)),
+          { value: salePrice }
         )
       ).to.be.revertedWith("IncorrectETHValue");
 
@@ -625,6 +681,15 @@ describe("NFTContract", async () => {
           rdmNotWhitelistedAccount1.address,
           whitelistTree.getHexProof(keccak256(rdmNotWhitelistedAccount1.address)),
           { value: 0 }
+        )
+      ).to.be.revertedWith("IncorrectETHValue");
+
+      await expect(
+        nftContract.connect(rdmNotWhitelistedAccount1).saleMint(
+          1,
+          rdmNotWhitelistedAccount1.address,
+          whitelistTree.getHexProof(keccak256(rdmNotWhitelistedAccount1.address)),
+          { value: wlPrice }
         )
       ).to.be.revertedWith("IncorrectETHValue");
 

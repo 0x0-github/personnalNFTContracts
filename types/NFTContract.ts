@@ -43,7 +43,7 @@ export interface NFTContractInterface extends utils.Interface {
     "salePrice()": FunctionFragment;
     "saleStart()": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
-    "setMaxMintTx(uint64)": FunctionFragment;
+    "setMaxMintTx(uint256)": FunctionFragment;
     "setMerkleRoot(bytes32)": FunctionFragment;
     "setMintPaused(bool)": FunctionFragment;
     "setSalePrice(uint256)": FunctionFragment;
@@ -275,7 +275,7 @@ export interface NFTContractInterface extends utils.Interface {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "ConsecutiveTransfer(uint256,uint256,address,address)": EventFragment;
-    "MaxMintTxUpdated(uint64)": EventFragment;
+    "MaxMintTxUpdated(uint256)": EventFragment;
     "MerkleRootUpdated(bytes32)": EventFragment;
     "MintPausedUpdated(bool)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
@@ -879,7 +879,7 @@ export interface NFTContract extends BaseContract {
       to?: string | null
     ): ConsecutiveTransferEventFilter;
 
-    "MaxMintTxUpdated(uint64)"(max?: null): MaxMintTxUpdatedEventFilter;
+    "MaxMintTxUpdated(uint256)"(max?: null): MaxMintTxUpdatedEventFilter;
     MaxMintTxUpdated(max?: null): MaxMintTxUpdatedEventFilter;
 
     "MerkleRootUpdated(bytes32)"(root?: null): MerkleRootUpdatedEventFilter;

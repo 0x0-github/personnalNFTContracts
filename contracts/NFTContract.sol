@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.15;
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -15,14 +15,14 @@ contract NFTContract is ERC721ABurnable, Ownable {
     error IncorrectETHValue();
     error SoldOut();
 
-    uint64 public constant MINT_SUPPLY = 20;
+    uint256 public constant MINT_SUPPLY = 20;
 
     bool public mintPaused = false;
 
-    uint64 public maxMintTx = 3;
-
     uint256 public salePrice = 2;
     uint256 public wlPrice = 1;
+
+    uint256 public maxMintTx = 3;
 
     uint256 public saleStart;
 
@@ -34,7 +34,7 @@ contract NFTContract is ERC721ABurnable, Ownable {
     event MintPausedUpdated(bool paused);
     event SalePriceUpdated(uint256 price);
     event WlPriceUpdated(uint256 price);
-    event MaxMintTxUpdated(uint64 max);
+    event MaxMintTxUpdated(uint256 max);
     event MerkleRootUpdated(bytes32 root);
     event UnrevealedURIUpdated(string unrevealedURI_);
     event Reveal(string baseURI_);
@@ -69,7 +69,7 @@ contract NFTContract is ERC721ABurnable, Ownable {
         emit WlPriceUpdated(price);
     }
 
-    function setMaxMintTx(uint64 max) external onlyOwner {
+    function setMaxMintTx(uint256 max) external onlyOwner {
         maxMintTx = max;
 
         emit MaxMintTxUpdated(max);
@@ -99,8 +99,7 @@ contract NFTContract is ERC721ABurnable, Ownable {
     function withdraw(address _address, uint256 _amount) external onlyOwner {
         (bool success, ) = _address.call{value: _amount}("");
         
-        if (!success)
-            revert TransferFailed();
+        if (!success) revert TransferFailed();
     }
 
     function numberMinted(address _owner) external view returns (uint256) {
@@ -115,17 +114,10 @@ contract NFTContract is ERC721ABurnable, Ownable {
         external
         payable
     {
-        if (block.timestamp < saleStart)
-            revert SaleNotStarted();
-
-        if (mintPaused)
-            revert MintPaused();
-
-        if (amount > maxMintTx)
-            revert AmountGtMax();
-
-        if (_totalMinted() + amount > MINT_SUPPLY)
-            revert SoldOut();
+        if (block.timestamp < saleStart) revert SaleNotStarted();
+        if (mintPaused) revert MintPaused();
+        if (amount > maxMintTx) revert AmountGtMax();
+        if (_totalMinted() + amount > MINT_SUPPLY) revert SoldOut();
 
         // TODO: Add check on max mints ?
 
@@ -135,10 +127,14 @@ contract NFTContract is ERC721ABurnable, Ownable {
             keccak256(abi.encodePacked(msg.sender))
         );
 
-        if (whitelisted && msg.value != amount * wlPrice) {
-            revert IncorrectETHValue();
-        } else if (!whitelisted && msg.value != amount * salePrice) {
-            revert IncorrectETHValue();
+        // Cannot overflow as amount will be limited by maxMintTx
+        // and max supply check
+        unchecked {
+            if (whitelisted && msg.value != amount * wlPrice) {
+                revert IncorrectETHValue();
+            } else if (!whitelisted && msg.value != amount * salePrice) {
+                revert IncorrectETHValue();
+            }
         }
 
         _mint(recipient, amount);
@@ -155,11 +151,10 @@ contract NFTContract is ERC721ABurnable, Ownable {
     function tokenURI(uint256 _nftId)
         public
         view
-        override
+        override(ERC721A, IERC721A)
         returns (string memory)
     {
-        if (!_exists(_nftId))
-            revert URIQueryForNonexistentToken();
+        if (!_exists(_nftId)) revert URIQueryForNonexistentToken();
 
         if (bytes(baseURI).length != 0) {
             return string(
