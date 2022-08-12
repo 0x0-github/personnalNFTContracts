@@ -286,19 +286,6 @@ describe("NFTContract", async () => {
     });
   });
 
-  describe("isSale", () => {
-    it("Returns false if sale is not started", async () => {
-      expect(await nftContract.isSale()).eq(false);
-    });
-    it("Returns true if sale is started", async () => {
-      expect(await nftContract.isSale()).eq(false);
-
-      await timeTravel(saleTimeout + 1);
-
-      expect(await nftContract.isSale()).eq(true);
-    });
-  });
-
   describe("totalMinted", () => {
     it("Returns the number minted for the given address", async () => {
       await timeTravel(saleTimeout + 1);

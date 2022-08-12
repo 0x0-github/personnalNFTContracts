@@ -4,12 +4,8 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
-import { SPECIAL_UNREVEAL_URI, UNREVEAL_URI } from "../utils/constants";
-import { getWhitelistMerkleTree } from "../utils/banner-whitelist-utils";
-import { FreeClaim, TestMoonBase, TestNFT } from "../types";
-import { waitFor } from "../utils/tx-helper";
-import { BigNumber } from "ethers";
-import { solidityKeccak256 } from "ethers/lib/utils";
+import { NFTContract } from "../types";
+import { getWhitelistMerkleTree } from "../utils/whitelist-utils";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -29,59 +25,15 @@ async function main() {
   let nftContract;
 
   if (nftContractAddr === "") {
-    const NFTContract = await ethers.getContractFactory("TestNFT");
-    nftContract = await NFTContract.deploy(0, 0, merkleRoot) as TestNFT;
+    const NFTContract = await ethers.getContractFactory("NFTContract");
+    nftContract = await NFTContract.deploy(0, merkleRoot) as NFTContract;
   
     await nftContract.deployed();
   
-    console.log("MLZ deployed to:", nftContract.address);
+    console.log("NFTContract deployed to:", nftContract.address);
   } else {
-    nftContract = await ethers.getContractAt("TestNFT", nftContractAddr) as TestNFT;
+    nftContract = await ethers.getContractAt("NFTContract", nftContractAddr) as NFTContract;
   }
-  
-  const moonBaseAddr = "";
-  let moonBase;
-
-  if (moonBaseAddr === "") {
-    const MoonBase = await ethers.getContractFactory("TestMoonBase");
-    moonBase = await MoonBase.deploy(nftContract.address) as TestMoonBase;
-
-    await moonBase.deployed();
-
-    console.log("MoonBase deployed to:", moonBase.address);
-
-    await waitFor(deployer.sendTransaction({
-      to: moonBase.address,
-      value: "10000"
-    }));
-
-    await waitFor(moonBase.mintBatches(100, { gasLimit: 2000000 }));
-
-    await waitFor(moonBase.updateCurrentMintId(1));
-    await waitFor(moonBase.updateMaxMintTx(10000));
-    await waitFor(moonBase.updateMintPaused(true));
-  } else {
-    moonBase = await ethers.getContractAt("TestMoonBase", moonBaseAddr);
-  }
-
-  const FreeClaim = await ethers.getContractFactory("FreeClaim");
-  const freeClaim = await FreeClaim.deploy(moonBase.address, nftContract.address) as FreeClaim;
-
-  await freeClaim.deployed();
-
-  console.log("FreeClaim deployed to:", freeClaim.address);
-
-  const merkleTree = getWhitelistMerkleTree();
-  const address = "0xcF176AE921BF3A4A4C7CD8010Fc52457A128DE22";
-  const amount = 3;
-
-  console.log("MERKLE ROOT");
-  console.log(merkleTree.getHexRoot());
-  console.log("PROOF");
-  console.log(merkleTree.getHexProof(solidityKeccak256(["address", "uint256"], [address, amount])));
-
-  await waitFor(freeClaim.setMerkleRoot(merkleTree.getHexRoot()));
-  await waitFor(moonBase.transferOwnership(freeClaim.address));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

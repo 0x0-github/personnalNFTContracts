@@ -3,7 +3,7 @@ import { getWhitelistMerkleTree } from "../utils/whitelist-utils";
 
 async function main() {
     const merkleTree = getWhitelistMerkleTree();
-    const address = "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4";
+    const address = "0xcF176AE921BF3A4A4C7CD8010Fc52457A128DE22";
 
     console.log("MERKLE ROOT");
     console.log(merkleTree.getHexRoot());

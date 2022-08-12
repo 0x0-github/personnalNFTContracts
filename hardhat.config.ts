@@ -17,7 +17,8 @@ const chainIds = {
   bsc_testnet: { id: 97, rpc: "https://data-seed-prebsc-1-s1.binance.org:8545/" },
 };
 // Ensure that we have all the environment variables we need.
-const privateKey: string | undefined = process.env.PRIVATE_KEY ?? "NO_PRIVATE_KEY";
+const privateKey: string = process.env.PRIVATE_KEY ?? "NO_PRIVATE_KEY";
+const altPrivateKeys: string[] = process.env.ALT_PRIVATE_KEYS?.split(",") ?? [];
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -31,7 +32,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 function getChainConfig(network: keyof typeof chainIds): NetworkUserConfig {
   return {
-    accounts: [`${privateKey}`],
+    accounts: [privateKey, ...altPrivateKeys],
     chainId: chainIds[network].id,
     url: chainIds[network].rpc,
   };

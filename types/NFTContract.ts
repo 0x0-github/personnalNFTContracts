@@ -28,7 +28,6 @@ export interface NFTContractInterface extends utils.Interface {
     "burn(uint256)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
-    "isSale()": FunctionFragment;
     "maxMintTx()": FunctionFragment;
     "merkleRoot()": FunctionFragment;
     "mintPaused()": FunctionFragment;
@@ -80,7 +79,6 @@ export interface NFTContractInterface extends utils.Interface {
     functionFragment: "isApprovedForAll",
     values: [string, string]
   ): string;
-  encodeFunctionData(functionFragment: "isSale", values?: undefined): string;
   encodeFunctionData(functionFragment: "maxMintTx", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "merkleRoot",
@@ -194,7 +192,6 @@ export interface NFTContractInterface extends utils.Interface {
     functionFragment: "isApprovedForAll",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "isSale", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "maxMintTx", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "merkleRoot", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mintPaused", data: BytesLike): Result;
@@ -432,8 +429,6 @@ export interface NFTContract extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    isSale(overrides?: CallOverrides): Promise<[boolean]>;
-
     maxMintTx(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     merkleRoot(overrides?: CallOverrides): Promise<[string]>;
@@ -592,8 +587,6 @@ export interface NFTContract extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  isSale(overrides?: CallOverrides): Promise<boolean>;
-
   maxMintTx(overrides?: CallOverrides): Promise<BigNumber>;
 
   merkleRoot(overrides?: CallOverrides): Promise<string>;
@@ -739,8 +732,6 @@ export interface NFTContract extends BaseContract {
       operator: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    isSale(overrides?: CallOverrides): Promise<boolean>;
 
     maxMintTx(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -954,8 +945,6 @@ export interface NFTContract extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    isSale(overrides?: CallOverrides): Promise<BigNumber>;
-
     maxMintTx(overrides?: CallOverrides): Promise<BigNumber>;
 
     merkleRoot(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1114,8 +1103,6 @@ export interface NFTContract extends BaseContract {
       operator: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    isSale(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     maxMintTx(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

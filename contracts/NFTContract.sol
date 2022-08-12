@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import "./MerkleProofLib.sol";
 
 // @author: 0x0
 
@@ -11,18 +11,21 @@ contract NFTContract is ERC721ABurnable, Ownable {
     error TransferFailed();
     error SaleNotStarted();
     error MintPaused();
-    error AmountGtMax();
+    error AmountGreaterThanMax();
     error IncorrectETHValue();
     error SoldOut();
+    error CannotUpdateFrozenURI();
 
     uint256 public constant MINT_SUPPLY = 20;
 
     bool public mintPaused = false;
+    bool public frozenURI = false;
 
     uint256 public salePrice = 2;
     uint256 public wlPrice = 1;
 
     uint256 public maxMintTx = 3;
+    uint256 public maxMintWL = 3;
 
     uint256 public saleStart;
 
@@ -35,14 +38,13 @@ contract NFTContract is ERC721ABurnable, Ownable {
     event SalePriceUpdated(uint256 price);
     event WlPriceUpdated(uint256 price);
     event MaxMintTxUpdated(uint256 max);
+    event MaxMintWLUpdated(uint256 max);
     event MerkleRootUpdated(bytes32 root);
     event UnrevealedURIUpdated(string unrevealedURI_);
     event Reveal(string baseURI_);
+    event FrozenURI();
 
-    constructor(
-        uint256 saleStart_,
-        bytes32 merkleRoot_
-    )
+    constructor(uint256 saleStart_, bytes32 merkleRoot_)
         ERC721A("NFTContract", "NFTC")
     {
         saleStart = saleStart_;
@@ -75,6 +77,12 @@ contract NFTContract is ERC721ABurnable, Ownable {
         emit MaxMintTxUpdated(max);
     }
 
+    function setMaxMintWL(uint256 max) external onlyOwner {
+        maxMintWL = max;
+
+        emit MaxMintWLUpdated(max);
+    }
+
     function setMerkleRoot(bytes32 root) external onlyOwner {
         merkleRoot = root;
 
@@ -91,14 +99,22 @@ contract NFTContract is ERC721ABurnable, Ownable {
     }
 
     function reveal(string calldata baseURI_) external onlyOwner {
+        if (frozenURI) revert CannotUpdateFrozenURI();
+
         baseURI = baseURI_;
 
         emit Reveal(baseURI_);
     }
 
+    function freezeURI() external onlyOwner {
+        frozenURI = true;
+
+        emit FrozenURI();
+    }
+
     function withdraw(address _address, uint256 _amount) external onlyOwner {
         (bool success, ) = _address.call{value: _amount}("");
-        
+
         if (!success) revert TransferFailed();
     }
 
@@ -110,24 +126,26 @@ contract NFTContract is ERC721ABurnable, Ownable {
         uint256 amount,
         address recipient,
         bytes32[] calldata _proof
-    )
-        external
-        payable
-    {
+    ) external payable {
         if (block.timestamp < saleStart) revert SaleNotStarted();
         if (mintPaused) revert MintPaused();
-        if (amount > maxMintTx) revert AmountGtMax();
-        if (_totalMinted() + amount > MINT_SUPPLY) revert SoldOut();
+        if (amount > maxMintTx) revert AmountGreaterThanMax();
 
-        // TODO: Add check on max mints ?
+        // Cannot overflow since amount will be limited by maxMintTx
+        // and total supply will be anytime lower than 2**256 - maxMintTx
+        unchecked {
+            if (_totalMinted() + amount > MINT_SUPPLY) revert SoldOut();
+        }
 
-        bool whitelisted = MerkleProof.verify(
+        // TODO: Add check on max mints / max WL mints etc.. ?
+
+        bool whitelisted = MerkleProofLib.verify(
             _proof,
             merkleRoot,
             keccak256(abi.encodePacked(msg.sender))
         );
 
-        // Cannot overflow as amount will be limited by maxMintTx
+        // Cannot overflow since amount will be limited by maxMintTx
         // and max supply check
         unchecked {
             if (whitelisted && msg.value != amount * wlPrice) {
@@ -138,10 +156,6 @@ contract NFTContract is ERC721ABurnable, Ownable {
         }
 
         _mint(recipient, amount);
-    }
-
-    function isSale() public view returns (bool) {
-        return block.timestamp >= saleStart;
     }
 
     function totalMinted() public view returns (uint256) {
@@ -157,9 +171,8 @@ contract NFTContract is ERC721ABurnable, Ownable {
         if (!_exists(_nftId)) revert URIQueryForNonexistentToken();
 
         if (bytes(baseURI).length != 0) {
-            return string(
-                abi.encodePacked(baseURI, _toString(_nftId), ".json")
-            );
+            return
+                string(abi.encodePacked(baseURI, _toString(_nftId), ".json"));
         }
 
         return unrevealedURI;
