@@ -4,14 +4,19 @@ pragma solidity ^0.8.15;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "./MerkleProofLib.sol";
+import "./WithdrawFairly.sol";
 
 // @author: 0x0
 
-contract NFTContract is ERC721ABurnable, Ownable {
-    error TransferFailed();
+contract NFTContract is ERC721ABurnable, Ownable, WithdrawFairly {
+    error NotPresaleTime();
+    error NotSaleTime();
     error SaleNotStarted();
     error MintPaused();
     error AmountGreaterThanMax();
+    error MaxPresaleMintsReached();
+    error MaxSaleMintsReached();
+    error NotWhitelisted();
     error IncorrectETHValue();
     error SoldOut();
     error CannotUpdateFrozenURI();
@@ -22,12 +27,14 @@ contract NFTContract is ERC721ABurnable, Ownable {
     bool public frozenURI = false;
 
     uint256 public salePrice = 2;
-    uint256 public wlPrice = 1;
+    uint256 public presalePrice = 1;
 
     uint256 public maxMintTx = 3;
-    uint256 public maxMintWL = 3;
+    uint256 public maxMintPresale = 3;
+    uint256 public maxMintSale = 100;
 
-    uint256 public saleStart;
+    uint256 public presaleStart;
+    uint256 public presaleEnd;
 
     bytes32 public merkleRoot;
 
@@ -36,22 +43,22 @@ contract NFTContract is ERC721ABurnable, Ownable {
 
     event MintPausedUpdated(bool paused);
     event SalePriceUpdated(uint256 price);
-    event WlPriceUpdated(uint256 price);
+    event PresalePriceUpdated(uint256 price);
     event MaxMintTxUpdated(uint256 max);
-    event MaxMintWLUpdated(uint256 max);
+    event MaxMintPresaleUpdated(uint256 max);
+    event MaxMintSaleUpdated(uint256 max);
     event MerkleRootUpdated(bytes32 root);
     event UnrevealedURIUpdated(string unrevealedURI_);
     event Reveal(string baseURI_);
     event FrozenURI();
 
-    constructor(uint256 saleStart_, bytes32 merkleRoot_)
+    constructor(uint256 presaleStart_, uint256 presaleEnd_, bytes32 merkleRoot_)
         ERC721A("NFTContract", "NFTC")
     {
-        saleStart = saleStart_;
+        presaleStart = presaleStart_;
+        presaleEnd = presaleEnd_;
         merkleRoot = merkleRoot_;
     }
-
-    receive() external payable {}
 
     function setMintPaused(bool paused) external onlyOwner {
         mintPaused = paused;
@@ -65,10 +72,10 @@ contract NFTContract is ERC721ABurnable, Ownable {
         emit SalePriceUpdated(price);
     }
 
-    function setWlPrice(uint256 price) external onlyOwner {
-        wlPrice = price;
+    function setPresalePrice(uint256 price) external onlyOwner {
+        presalePrice = price;
 
-        emit WlPriceUpdated(price);
+        emit PresalePriceUpdated(price);
     }
 
     function setMaxMintTx(uint256 max) external onlyOwner {
@@ -77,10 +84,16 @@ contract NFTContract is ERC721ABurnable, Ownable {
         emit MaxMintTxUpdated(max);
     }
 
-    function setMaxMintWL(uint256 max) external onlyOwner {
-        maxMintWL = max;
+    function setMaxMintPresale(uint256 max) external onlyOwner {
+        maxMintPresale = max;
 
-        emit MaxMintWLUpdated(max);
+        emit MaxMintPresaleUpdated(max);
+    }
+
+    function setMaxMintSale(uint256 max) external onlyOwner {
+        maxMintSale = max;
+
+        emit MaxMintSaleUpdated(max);
     }
 
     function setMerkleRoot(bytes32 root) external onlyOwner {
@@ -112,54 +125,81 @@ contract NFTContract is ERC721ABurnable, Ownable {
         emit FrozenURI();
     }
 
-    function withdraw(address _address, uint256 _amount) external onlyOwner {
-        (bool success, ) = _address.call{value: _amount}("");
+    function presaleMint(
+        uint256 amount,
+        address recipient,
+        bytes32[] calldata _proof
+    ) external payable {
+        if (!isPresale()) revert NotPresaleTime();
+        if (mintPaused) revert MintPaused();
+        if (amount > maxMintTx) revert AmountGreaterThanMax();
 
-        if (!success) revert TransferFailed();
+        // Cannot overflow since amount will be limited by maxMintTx
+        // total supply will be anytime lower than 2**256 - maxMintTx
+        // and prices will be not matter what lower than 10^18
+        unchecked {
+            if (_totalMinted() + amount > MINT_SUPPLY) revert SoldOut();
+            if (msg.value != amount * presalePrice) revert IncorrectETHValue();
+
+            // No need to use aux yet as numberMinted == presale mints here
+            if (_numberMinted(msg.sender) + amount > maxMintPresale)
+                revert MaxPresaleMintsReached();
+        }
+
+        if (
+            !MerkleProofLib.verify(
+                _proof,
+                merkleRoot,
+                keccak256(abi.encodePacked(msg.sender))
+            )
+        )
+            revert NotWhitelisted();
+
+        _mint(recipient, amount);
+    }
+
+    function saleMint(uint256 amount, address recipient) external payable {
+        if (!isSale()) revert NotSaleTime();
+        if (mintPaused) revert MintPaused();
+        if (amount > maxMintTx) revert AmountGreaterThanMax();
+
+        uint64 currentSaleMints = _getAux(msg.sender);
+        uint64 nextSaleMints;
+
+        assembly {
+            nextSaleMints := add(currentSaleMints, amount)
+        }
+
+        if (nextSaleMints > maxMintSale) revert MaxSaleMintsReached();
+
+        // Cannot overflow since amount will be limited by maxMintTx
+        // and total supply will be anytime lower than 2**256 - maxMintTx
+        // and prices will be not matter what lower than 10^18
+        unchecked {
+            if (_totalMinted() + amount > MINT_SUPPLY) revert SoldOut();
+            if (msg.value != amount * salePrice) revert IncorrectETHValue();
+        }
+
+        // Sets the sale mints
+        _setAux(msg.sender, nextSaleMints);
+        _mint(recipient, amount);
+    }
+
+    function totalMinted() external view returns (uint256) {
+        return _totalMinted();
     }
 
     function numberMinted(address _owner) external view returns (uint256) {
         return _numberMinted(_owner);
     }
 
-    function saleMint(
-        uint256 amount,
-        address recipient,
-        bytes32[] calldata _proof
-    ) external payable {
-        if (block.timestamp < saleStart) revert SaleNotStarted();
-        if (mintPaused) revert MintPaused();
-        if (amount > maxMintTx) revert AmountGreaterThanMax();
-
-        // Cannot overflow since amount will be limited by maxMintTx
-        // and total supply will be anytime lower than 2**256 - maxMintTx
-        unchecked {
-            if (_totalMinted() + amount > MINT_SUPPLY) revert SoldOut();
-        }
-
-        // TODO: Add check on max mints / max WL mints etc.. ?
-
-        bool whitelisted = MerkleProofLib.verify(
-            _proof,
-            merkleRoot,
-            keccak256(abi.encodePacked(msg.sender))
-        );
-
-        // Cannot overflow since amount will be limited by maxMintTx
-        // and max supply check
-        unchecked {
-            if (whitelisted && msg.value != amount * wlPrice) {
-                revert IncorrectETHValue();
-            } else if (!whitelisted && msg.value != amount * salePrice) {
-                revert IncorrectETHValue();
-            }
-        }
-
-        _mint(recipient, amount);
+    function isPresale() public view returns (bool) {
+        return block.timestamp > presaleStart &&
+            block.timestamp < presaleEnd;
     }
 
-    function totalMinted() public view returns (uint256) {
-        return _totalMinted();
+    function isSale() public view returns (bool) {
+        return block.timestamp > presaleEnd;
     }
 
     function tokenURI(uint256 _nftId)

@@ -24,11 +24,11 @@ contract WithdrawFairly {
     event SharedTokenPart(bool isSalePart);
 
     constructor(){
-        parts.push(Part(0xecB4278af1379c38Eab140063fFC426f05FEde28, 1000, 1000));
-        parts.push(Part(0xE1580cA711094CF2888716a54c5A892245653435, 2000, 2000));
-        parts.push(Part(0x06DcBa9ef76B9C6a129Df78D55f99989905e5F96, 2800, 2800));
-        parts.push(Part(0x9d246cA915ea31be43B4eF151e473d6e8Bc892eF, 2172, 2172));
-        parts.push(Part(0x2af89f045fB0B17Ad218423Cff3744ee25a69845, 2028, 2028));
+        parts.push(Part(0x92010D29227Ebe9A7625AC398310A7bB3030EcBE, 1000, 1000));
+        parts.push(Part(0x0000000000000000000000000000000000000001, 2000, 2000));
+        parts.push(Part(0x0000000000000000000000000000000000000002, 2800, 2800));
+        parts.push(Part(0x0000000000000000000000000000000000000003, 2172, 2172));
+        parts.push(Part(0x0000000000000000000000000000000000000004, 2028, 2028));
         callers[0xecB4278af1379c38Eab140063fFC426f05FEde28] = true;
     }
 
