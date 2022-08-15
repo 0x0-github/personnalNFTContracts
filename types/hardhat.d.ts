@@ -45,6 +45,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
     getContractFactory(
+      name: "ERC721A2IERC721Receiver",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721A2IERC721Receiver__factory>;
+    getContractFactory(
+      name: "ERC721A2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721A2__factory>;
+    getContractFactory(
+      name: "ERC721ExtraData",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721ExtraData__factory>;
+    getContractFactory(
       name: "FreeClaim",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FreeClaim__factory>;
@@ -64,6 +76,10 @@ declare module "hardhat/types/runtime" {
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
+      name: "IERC721A",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC721A__factory>;
     getContractFactory(
       name: "IERC165",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -92,6 +108,10 @@ declare module "hardhat/types/runtime" {
       name: "MoonLanderzNFTBanner",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MoonLanderzNFTBanner__factory>;
+    getContractFactory(
+      name: "NFTContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.NFTContract__factory>;
     getContractFactory(
       name: "NFTContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -218,6 +238,21 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
     getContractAt(
+      name: "ERC721A2IERC721Receiver",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721A2IERC721Receiver>;
+    getContractAt(
+      name: "ERC721A2",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721A2>;
+    getContractAt(
+      name: "ERC721ExtraData",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721ExtraData>;
+    getContractAt(
       name: "FreeClaim",
       address: string,
       signer?: ethers.Signer
@@ -242,6 +277,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
+    getContractAt(
+      name: "IERC721A",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC721A>;
     getContractAt(
       name: "IERC165",
       address: string,
@@ -277,6 +317,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.MoonLanderzNFTBanner>;
+    getContractAt(
+      name: "NFTContract",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.NFTContract>;
     getContractAt(
       name: "NFTContract",
       address: string,

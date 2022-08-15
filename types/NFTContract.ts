@@ -26,8 +26,15 @@ export interface NFTContractInterface extends utils.Interface {
     "balanceOf(address)": FunctionFragment;
     "baseURI()": FunctionFragment;
     "burn(uint256)": FunctionFragment;
+    "callers(address)": FunctionFragment;
+    "freezeURI()": FunctionFragment;
+    "frozenURI()": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
+    "isPresale()": FunctionFragment;
+    "isSale()": FunctionFragment;
+    "maxMintPresale()": FunctionFragment;
+    "maxMintSale()": FunctionFragment;
     "maxMintTx()": FunctionFragment;
     "merkleRoot()": FunctionFragment;
     "mintPaused()": FunctionFragment;
@@ -35,19 +42,27 @@ export interface NFTContractInterface extends utils.Interface {
     "numberMinted(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
+    "parts(uint256)": FunctionFragment;
+    "presaleEnd()": FunctionFragment;
+    "presaleMint(uint256,address,bytes32[])": FunctionFragment;
+    "presalePrice()": FunctionFragment;
+    "presaleStart()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "reveal(string)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
-    "saleMint(uint256,address,bytes32[])": FunctionFragment;
+    "saleMint(uint256,address)": FunctionFragment;
     "salePrice()": FunctionFragment;
-    "saleStart()": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
+    "setMaxMintPresale(uint256)": FunctionFragment;
+    "setMaxMintSale(uint256)": FunctionFragment;
     "setMaxMintTx(uint256)": FunctionFragment;
     "setMerkleRoot(bytes32)": FunctionFragment;
     "setMintPaused(bool)": FunctionFragment;
+    "setPresalePrice(uint256)": FunctionFragment;
     "setSalePrice(uint256)": FunctionFragment;
     "setUnrevealedURI(string)": FunctionFragment;
-    "setWlPrice(uint256)": FunctionFragment;
+    "shareETHPart(bool)": FunctionFragment;
+    "shareTokenPart(bool,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "symbol()": FunctionFragment;
     "tokenURI(uint256)": FunctionFragment;
@@ -56,8 +71,6 @@ export interface NFTContractInterface extends utils.Interface {
     "transferFrom(address,address,uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unrevealedURI()": FunctionFragment;
-    "withdraw(address,uint256)": FunctionFragment;
-    "wlPrice()": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -71,6 +84,9 @@ export interface NFTContractInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
   encodeFunctionData(functionFragment: "baseURI", values?: undefined): string;
   encodeFunctionData(functionFragment: "burn", values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: "callers", values: [string]): string;
+  encodeFunctionData(functionFragment: "freezeURI", values?: undefined): string;
+  encodeFunctionData(functionFragment: "frozenURI", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getApproved",
     values: [BigNumberish]
@@ -78,6 +94,16 @@ export interface NFTContractInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
     values: [string, string]
+  ): string;
+  encodeFunctionData(functionFragment: "isPresale", values?: undefined): string;
+  encodeFunctionData(functionFragment: "isSale", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "maxMintPresale",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maxMintSale",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "maxMintTx", values?: undefined): string;
   encodeFunctionData(
@@ -98,6 +124,23 @@ export interface NFTContractInterface extends utils.Interface {
     functionFragment: "ownerOf",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "parts", values: [BigNumberish]): string;
+  encodeFunctionData(
+    functionFragment: "presaleEnd",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "presaleMint",
+    values: [BigNumberish, string, BytesLike[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "presalePrice",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "presaleStart",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
@@ -109,13 +152,20 @@ export interface NFTContractInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "saleMint",
-    values: [BigNumberish, string, BytesLike[]]
+    values: [BigNumberish, string]
   ): string;
   encodeFunctionData(functionFragment: "salePrice", values?: undefined): string;
-  encodeFunctionData(functionFragment: "saleStart", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "setApprovalForAll",
     values: [string, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setMaxMintPresale",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setMaxMintSale",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setMaxMintTx",
@@ -130,6 +180,10 @@ export interface NFTContractInterface extends utils.Interface {
     values: [boolean]
   ): string;
   encodeFunctionData(
+    functionFragment: "setPresalePrice",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setSalePrice",
     values: [BigNumberish]
   ): string;
@@ -138,8 +192,12 @@ export interface NFTContractInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setWlPrice",
-    values: [BigNumberish]
+    functionFragment: "shareETHPart",
+    values: [boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "shareTokenPart",
+    values: [boolean, string]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -170,11 +228,6 @@ export interface NFTContractInterface extends utils.Interface {
     functionFragment: "unrevealedURI",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "withdraw",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(functionFragment: "wlPrice", values?: undefined): string;
 
   decodeFunctionResult(
     functionFragment: "MINT_SUPPLY",
@@ -184,12 +237,25 @@ export interface NFTContractInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "baseURI", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "callers", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "freezeURI", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "frozenURI", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getApproved",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "isPresale", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "isSale", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "maxMintPresale",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "maxMintSale",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "maxMintTx", data: BytesLike): Result;
@@ -202,6 +268,20 @@ export interface NFTContractInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "parts", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "presaleEnd", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "presaleMint",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "presalePrice",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "presaleStart",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -213,9 +293,16 @@ export interface NFTContractInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "saleMint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "salePrice", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "saleStart", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setApprovalForAll",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setMaxMintPresale",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setMaxMintSale",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -231,6 +318,10 @@ export interface NFTContractInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setPresalePrice",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setSalePrice",
     data: BytesLike
   ): Result;
@@ -238,7 +329,14 @@ export interface NFTContractInterface extends utils.Interface {
     functionFragment: "setUnrevealedURI",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "setWlPrice", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "shareETHPart",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "shareTokenPart",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -265,36 +363,44 @@ export interface NFTContractInterface extends utils.Interface {
     functionFragment: "unrevealedURI",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "wlPrice", data: BytesLike): Result;
 
   events: {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "ConsecutiveTransfer(uint256,uint256,address,address)": EventFragment;
+    "FrozenURI()": EventFragment;
+    "MaxMintPresaleUpdated(uint256)": EventFragment;
+    "MaxMintSaleUpdated(uint256)": EventFragment;
     "MaxMintTxUpdated(uint256)": EventFragment;
     "MerkleRootUpdated(bytes32)": EventFragment;
     "MintPausedUpdated(bool)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "PresalePriceUpdated(uint256)": EventFragment;
     "Reveal(string)": EventFragment;
     "SalePriceUpdated(uint256)": EventFragment;
+    "SharedETHPart(bool)": EventFragment;
+    "SharedTokenPart(bool)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
     "UnrevealedURIUpdated(string)": EventFragment;
-    "WlPriceUpdated(uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ConsecutiveTransfer"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "FrozenURI"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MaxMintPresaleUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MaxMintSaleUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MaxMintTxUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MerkleRootUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MintPausedUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PresalePriceUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Reveal"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SalePriceUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SharedETHPart"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SharedTokenPart"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UnrevealedURIUpdated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WlPriceUpdated"): EventFragment;
 }
 
 export type ApprovalEvent = TypedEvent<
@@ -319,6 +425,26 @@ export type ConsecutiveTransferEvent = TypedEvent<
 export type ConsecutiveTransferEventFilter =
   TypedEventFilter<ConsecutiveTransferEvent>;
 
+export type FrozenURIEvent = TypedEvent<[], {}>;
+
+export type FrozenURIEventFilter = TypedEventFilter<FrozenURIEvent>;
+
+export type MaxMintPresaleUpdatedEvent = TypedEvent<
+  [BigNumber],
+  { max: BigNumber }
+>;
+
+export type MaxMintPresaleUpdatedEventFilter =
+  TypedEventFilter<MaxMintPresaleUpdatedEvent>;
+
+export type MaxMintSaleUpdatedEvent = TypedEvent<
+  [BigNumber],
+  { max: BigNumber }
+>;
+
+export type MaxMintSaleUpdatedEventFilter =
+  TypedEventFilter<MaxMintSaleUpdatedEvent>;
+
 export type MaxMintTxUpdatedEvent = TypedEvent<[BigNumber], { max: BigNumber }>;
 
 export type MaxMintTxUpdatedEventFilter =
@@ -342,6 +468,14 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
+export type PresalePriceUpdatedEvent = TypedEvent<
+  [BigNumber],
+  { price: BigNumber }
+>;
+
+export type PresalePriceUpdatedEventFilter =
+  TypedEventFilter<PresalePriceUpdatedEvent>;
+
 export type RevealEvent = TypedEvent<[string], { baseURI_: string }>;
 
 export type RevealEventFilter = TypedEventFilter<RevealEvent>;
@@ -353,6 +487,17 @@ export type SalePriceUpdatedEvent = TypedEvent<
 
 export type SalePriceUpdatedEventFilter =
   TypedEventFilter<SalePriceUpdatedEvent>;
+
+export type SharedETHPartEvent = TypedEvent<[boolean], { isSalePart: boolean }>;
+
+export type SharedETHPartEventFilter = TypedEventFilter<SharedETHPartEvent>;
+
+export type SharedTokenPartEvent = TypedEvent<
+  [boolean],
+  { isSalePart: boolean }
+>;
+
+export type SharedTokenPartEventFilter = TypedEventFilter<SharedTokenPartEvent>;
 
 export type TransferEvent = TypedEvent<
   [string, string, BigNumber],
@@ -368,10 +513,6 @@ export type UnrevealedURIUpdatedEvent = TypedEvent<
 
 export type UnrevealedURIUpdatedEventFilter =
   TypedEventFilter<UnrevealedURIUpdatedEvent>;
-
-export type WlPriceUpdatedEvent = TypedEvent<[BigNumber], { price: BigNumber }>;
-
-export type WlPriceUpdatedEventFilter = TypedEventFilter<WlPriceUpdatedEvent>;
 
 export interface NFTContract extends BaseContract {
   contractName: "NFTContract";
@@ -418,6 +559,14 @@ export interface NFTContract extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    callers(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+
+    freezeURI(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    frozenURI(overrides?: CallOverrides): Promise<[boolean]>;
+
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -428,6 +577,14 @@ export interface NFTContract extends BaseContract {
       operator: string,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
+
+    isPresale(overrides?: CallOverrides): Promise<[boolean]>;
+
+    isSale(overrides?: CallOverrides): Promise<[boolean]>;
+
+    maxMintPresale(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    maxMintSale(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     maxMintTx(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -448,6 +605,30 @@ export interface NFTContract extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
+
+    parts(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, number, number] & {
+        wallet: string;
+        salesPart: number;
+        royaltiesPart: number;
+      }
+    >;
+
+    presaleEnd(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    presaleMint(
+      amount: BigNumberish,
+      recipient: string,
+      _proof: BytesLike[],
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    presalePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    presaleStart(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -476,17 +657,24 @@ export interface NFTContract extends BaseContract {
     saleMint(
       amount: BigNumberish,
       recipient: string,
-      _proof: BytesLike[],
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     salePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    saleStart(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     setApprovalForAll(
       operator: string,
       approved: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setMaxMintPresale(
+      max: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setMaxMintSale(
+      max: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -505,6 +693,11 @@ export interface NFTContract extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setPresalePrice(
+      price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setSalePrice(
       price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -515,8 +708,14 @@ export interface NFTContract extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setWlPrice(
-      price: BigNumberish,
+    shareETHPart(
+      isSalePart: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    shareTokenPart(
+      isSalePart: boolean,
+      token: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -549,14 +748,6 @@ export interface NFTContract extends BaseContract {
     ): Promise<ContractTransaction>;
 
     unrevealedURI(overrides?: CallOverrides): Promise<[string]>;
-
-    withdraw(
-      _address: string,
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    wlPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
   MINT_SUPPLY(overrides?: CallOverrides): Promise<BigNumber>;
@@ -576,6 +767,14 @@ export interface NFTContract extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  callers(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
+  freezeURI(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  frozenURI(overrides?: CallOverrides): Promise<boolean>;
+
   getApproved(
     tokenId: BigNumberish,
     overrides?: CallOverrides
@@ -586,6 +785,14 @@ export interface NFTContract extends BaseContract {
     operator: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
+
+  isPresale(overrides?: CallOverrides): Promise<boolean>;
+
+  isSale(overrides?: CallOverrides): Promise<boolean>;
+
+  maxMintPresale(overrides?: CallOverrides): Promise<BigNumber>;
+
+  maxMintSale(overrides?: CallOverrides): Promise<BigNumber>;
 
   maxMintTx(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -600,6 +807,30 @@ export interface NFTContract extends BaseContract {
   owner(overrides?: CallOverrides): Promise<string>;
 
   ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  parts(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<
+    [string, number, number] & {
+      wallet: string;
+      salesPart: number;
+      royaltiesPart: number;
+    }
+  >;
+
+  presaleEnd(overrides?: CallOverrides): Promise<BigNumber>;
+
+  presaleMint(
+    amount: BigNumberish,
+    recipient: string,
+    _proof: BytesLike[],
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  presalePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+  presaleStart(overrides?: CallOverrides): Promise<BigNumber>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -628,17 +859,24 @@ export interface NFTContract extends BaseContract {
   saleMint(
     amount: BigNumberish,
     recipient: string,
-    _proof: BytesLike[],
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   salePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
-  saleStart(overrides?: CallOverrides): Promise<BigNumber>;
-
   setApprovalForAll(
     operator: string,
     approved: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setMaxMintPresale(
+    max: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setMaxMintSale(
+    max: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -657,6 +895,11 @@ export interface NFTContract extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setPresalePrice(
+    price: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   setSalePrice(
     price: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -667,8 +910,14 @@ export interface NFTContract extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setWlPrice(
-    price: BigNumberish,
+  shareETHPart(
+    isSalePart: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  shareTokenPart(
+    isSalePart: boolean,
+    token: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -699,14 +948,6 @@ export interface NFTContract extends BaseContract {
 
   unrevealedURI(overrides?: CallOverrides): Promise<string>;
 
-  withdraw(
-    _address: string,
-    _amount: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  wlPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
   callStatic: {
     MINT_SUPPLY(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -722,6 +963,12 @@ export interface NFTContract extends BaseContract {
 
     burn(tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
+    callers(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
+    freezeURI(overrides?: CallOverrides): Promise<void>;
+
+    frozenURI(overrides?: CallOverrides): Promise<boolean>;
+
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -732,6 +979,14 @@ export interface NFTContract extends BaseContract {
       operator: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    isPresale(overrides?: CallOverrides): Promise<boolean>;
+
+    isSale(overrides?: CallOverrides): Promise<boolean>;
+
+    maxMintPresale(overrides?: CallOverrides): Promise<BigNumber>;
+
+    maxMintSale(overrides?: CallOverrides): Promise<BigNumber>;
 
     maxMintTx(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -746,6 +1001,30 @@ export interface NFTContract extends BaseContract {
     owner(overrides?: CallOverrides): Promise<string>;
 
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    parts(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, number, number] & {
+        wallet: string;
+        salesPart: number;
+        royaltiesPart: number;
+      }
+    >;
+
+    presaleEnd(overrides?: CallOverrides): Promise<BigNumber>;
+
+    presaleMint(
+      amount: BigNumberish,
+      recipient: string,
+      _proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    presalePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    presaleStart(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -769,13 +1048,10 @@ export interface NFTContract extends BaseContract {
     saleMint(
       amount: BigNumberish,
       recipient: string,
-      _proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     salePrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-    saleStart(overrides?: CallOverrides): Promise<BigNumber>;
 
     setApprovalForAll(
       operator: string,
@@ -783,11 +1059,23 @@ export interface NFTContract extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setMaxMintPresale(
+      max: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setMaxMintSale(max: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
     setMaxMintTx(max: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     setMerkleRoot(root: BytesLike, overrides?: CallOverrides): Promise<void>;
 
     setMintPaused(paused: boolean, overrides?: CallOverrides): Promise<void>;
+
+    setPresalePrice(
+      price: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setSalePrice(price: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -796,7 +1084,13 @@ export interface NFTContract extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setWlPrice(price: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    shareETHPart(isSalePart: boolean, overrides?: CallOverrides): Promise<void>;
+
+    shareTokenPart(
+      isSalePart: boolean,
+      token: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     supportsInterface(
       interfaceId: BytesLike,
@@ -824,14 +1118,6 @@ export interface NFTContract extends BaseContract {
     ): Promise<void>;
 
     unrevealedURI(overrides?: CallOverrides): Promise<string>;
-
-    withdraw(
-      _address: string,
-      _amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    wlPrice(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   filters: {
@@ -870,6 +1156,17 @@ export interface NFTContract extends BaseContract {
       to?: string | null
     ): ConsecutiveTransferEventFilter;
 
+    "FrozenURI()"(): FrozenURIEventFilter;
+    FrozenURI(): FrozenURIEventFilter;
+
+    "MaxMintPresaleUpdated(uint256)"(
+      max?: null
+    ): MaxMintPresaleUpdatedEventFilter;
+    MaxMintPresaleUpdated(max?: null): MaxMintPresaleUpdatedEventFilter;
+
+    "MaxMintSaleUpdated(uint256)"(max?: null): MaxMintSaleUpdatedEventFilter;
+    MaxMintSaleUpdated(max?: null): MaxMintSaleUpdatedEventFilter;
+
     "MaxMintTxUpdated(uint256)"(max?: null): MaxMintTxUpdatedEventFilter;
     MaxMintTxUpdated(max?: null): MaxMintTxUpdatedEventFilter;
 
@@ -888,11 +1185,22 @@ export interface NFTContract extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
+    "PresalePriceUpdated(uint256)"(
+      price?: null
+    ): PresalePriceUpdatedEventFilter;
+    PresalePriceUpdated(price?: null): PresalePriceUpdatedEventFilter;
+
     "Reveal(string)"(baseURI_?: null): RevealEventFilter;
     Reveal(baseURI_?: null): RevealEventFilter;
 
     "SalePriceUpdated(uint256)"(price?: null): SalePriceUpdatedEventFilter;
     SalePriceUpdated(price?: null): SalePriceUpdatedEventFilter;
+
+    "SharedETHPart(bool)"(isSalePart?: null): SharedETHPartEventFilter;
+    SharedETHPart(isSalePart?: null): SharedETHPartEventFilter;
+
+    "SharedTokenPart(bool)"(isSalePart?: null): SharedTokenPartEventFilter;
+    SharedTokenPart(isSalePart?: null): SharedTokenPartEventFilter;
 
     "Transfer(address,address,uint256)"(
       from?: string | null,
@@ -911,9 +1219,6 @@ export interface NFTContract extends BaseContract {
     UnrevealedURIUpdated(
       unrevealedURI_?: null
     ): UnrevealedURIUpdatedEventFilter;
-
-    "WlPriceUpdated(uint256)"(price?: null): WlPriceUpdatedEventFilter;
-    WlPriceUpdated(price?: null): WlPriceUpdatedEventFilter;
   };
 
   estimateGas: {
@@ -934,6 +1239,14 @@ export interface NFTContract extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    callers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    freezeURI(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    frozenURI(overrides?: CallOverrides): Promise<BigNumber>;
+
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -944,6 +1257,14 @@ export interface NFTContract extends BaseContract {
       operator: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    isPresale(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isSale(overrides?: CallOverrides): Promise<BigNumber>;
+
+    maxMintPresale(overrides?: CallOverrides): Promise<BigNumber>;
+
+    maxMintSale(overrides?: CallOverrides): Promise<BigNumber>;
 
     maxMintTx(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -961,6 +1282,21 @@ export interface NFTContract extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    parts(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+    presaleEnd(overrides?: CallOverrides): Promise<BigNumber>;
+
+    presaleMint(
+      amount: BigNumberish,
+      recipient: string,
+      _proof: BytesLike[],
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    presalePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    presaleStart(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -989,17 +1325,24 @@ export interface NFTContract extends BaseContract {
     saleMint(
       amount: BigNumberish,
       recipient: string,
-      _proof: BytesLike[],
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     salePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
-    saleStart(overrides?: CallOverrides): Promise<BigNumber>;
-
     setApprovalForAll(
       operator: string,
       approved: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setMaxMintPresale(
+      max: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setMaxMintSale(
+      max: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1018,6 +1361,11 @@ export interface NFTContract extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    setPresalePrice(
+      price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     setSalePrice(
       price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1028,8 +1376,14 @@ export interface NFTContract extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setWlPrice(
-      price: BigNumberish,
+    shareETHPart(
+      isSalePart: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    shareTokenPart(
+      isSalePart: boolean,
+      token: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1062,14 +1416,6 @@ export interface NFTContract extends BaseContract {
     ): Promise<BigNumber>;
 
     unrevealedURI(overrides?: CallOverrides): Promise<BigNumber>;
-
-    withdraw(
-      _address: string,
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    wlPrice(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -1093,6 +1439,17 @@ export interface NFTContract extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    callers(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    freezeURI(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    frozenURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1103,6 +1460,14 @@ export interface NFTContract extends BaseContract {
       operator: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    isPresale(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isSale(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    maxMintPresale(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    maxMintSale(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     maxMintTx(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -1123,6 +1488,24 @@ export interface NFTContract extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    parts(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    presaleEnd(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    presaleMint(
+      amount: BigNumberish,
+      recipient: string,
+      _proof: BytesLike[],
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    presalePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    presaleStart(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1151,17 +1534,24 @@ export interface NFTContract extends BaseContract {
     saleMint(
       amount: BigNumberish,
       recipient: string,
-      _proof: BytesLike[],
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     salePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    saleStart(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     setApprovalForAll(
       operator: string,
       approved: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setMaxMintPresale(
+      max: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setMaxMintSale(
+      max: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1180,6 +1570,11 @@ export interface NFTContract extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    setPresalePrice(
+      price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     setSalePrice(
       price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1190,8 +1585,14 @@ export interface NFTContract extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setWlPrice(
-      price: BigNumberish,
+    shareETHPart(
+      isSalePart: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    shareTokenPart(
+      isSalePart: boolean,
+      token: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1224,13 +1625,5 @@ export interface NFTContract extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     unrevealedURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    withdraw(
-      _address: string,
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    wlPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

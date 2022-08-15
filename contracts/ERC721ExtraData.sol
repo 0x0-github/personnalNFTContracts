@@ -108,7 +108,7 @@ abstract contract ERC721ExtraData is Ownable {
      * [98..161]     presalePrice      => max 18.44... ETH
      * [162..225]    saleprice         => as above
      * [226..233]    maxMintTx         => max 255 / no infinity => overflow
-     * [234..241]    maxMintPresale    => as above / 0 = "infinite"
+     * [234..241]    maxMintPresale    => max 255
      * [242..249]    maxMintSale       => as above
      */
     uint256 private config;
@@ -132,9 +132,6 @@ abstract contract ERC721ExtraData is Ownable {
     event MerkleRootUpdated(bytes32 root);
     event UnrevealURIUpdated(string uri);
     event BaseURIUpdated(string uri);
-
-    constructor() {
-    }
 
     /**
      * @notice Updates the current conf packed as a uint256
@@ -326,7 +323,7 @@ abstract contract ERC721ExtraData is Ownable {
      * @notice Validates the presale mint call according to the current config
      * @dev Should be called on presale mint before _mint call, doesn't take
      * care of any write operation needed if using other impl than ERC721A
-     * (not needed in that case since only relying on numberMinted)
+     * (relying on numberMinted is enough at this stage for this last one)
      * @param amount The amount to be minted
      * @param currentMinted The current ERC721 minted (pre-mint)
      * @param numberMinted The number already minted for presale by caller
@@ -354,6 +351,10 @@ abstract contract ERC721ExtraData is Ownable {
         if (amount > (conf >> _POS_MAX_MINT_TX) & _MASK_UINT8)
             revert AmountGreaterThanMax();
 
+        // Both below cannot overflow since supply and amount are limited
+        // - amount: 255
+        // - max mintable (currentMinted + amount): 18446744073709551615
+        // - max mintable presale per wallet (numberMinted + amount): 255
         unchecked {
             if (
                 currentMinted + amount >
@@ -411,6 +412,10 @@ abstract contract ERC721ExtraData is Ownable {
         if (amount > (conf >> _POS_MAX_MINT_TX) & _MASK_UINT8)
             revert AmountGreaterThanMax();
         
+        // Both below cannot overflow since supply and amount are limited
+        // - amount: 255
+        // - max mintable (currentMinted + amount): 18446744073709551615
+        // - max mintable sale per wallet (numberMinted + amount): 255
         unchecked {
             if (
                 currentMinted + amount >
