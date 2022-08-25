@@ -9,6 +9,13 @@ import "./MerkleProofLib.sol";
  * @author 0x0
  * @notice Describes common behaviour for ERC721 like presale / sale,
  * WL, reveal, URI freezing...
+ * This comes with some limitations:
+ * - presaleStart & presaleEnd cannot be set above year 2106
+ * - maxSupply cannot be set above 4294967295
+ * - presalePrice & salePrice cannot be set above 18446744073709551615
+ * - maxMintTx & maxMintPresale & maxMintSale cannot be set above 255
+ * Those last one means noone will ever be able to mint more than 255
+ * for each rounds = 510 max mintable (per caller only)
  * @dev Packing variables to save space onchain but also to retreive faster
  * all the related data => 1 view tx. Save some space on ERC721 contract
  * and split logics => only IERC721 impl + custom impl (if so).

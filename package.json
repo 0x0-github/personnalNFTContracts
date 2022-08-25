@@ -35,6 +35,8 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.5.0",
     "erc721a": "github:chiru-labs/ERC721A",
-    "merkletreejs": "^0.2.30"
+    "mathjs": "^11.0.1",
+    "merkletreejs": "^0.2.30",
+    "web3": "^1.7.5"
   }
 }

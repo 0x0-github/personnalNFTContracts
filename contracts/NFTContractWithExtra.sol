@@ -7,7 +7,7 @@ import "./WithdrawFairly.sol";
 
 // @author: 0x0
 
-contract NFTContract is ERC721ABurnable, ERC721ExtraData, WithdrawFairly {
+contract NFTContractWithExtra is ERC721ABurnable, ERC721ExtraData, WithdrawFairly {
     constructor() ERC721A("NFTContract", "NFTC") {
     }
 
